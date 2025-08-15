@@ -1,7 +1,10 @@
+// @ts-check
 'use strict';
 const { Client, GatewayIntentBits } = require('discord.js');
+// @ts-ignore
 const mkdirp = require('mkdirp');
 const fs = require('fs');
+// @ts-ignore
 const emojiNameMap = require('emoji-name-map');
 const {
   PATH,
@@ -35,7 +38,9 @@ fs.exists(EMOJI_PATH, (exists) => {
   if (!exists) {
     fs.writeFileSync(EMOJI_PATH, '{}');
   }
+  // @ts-ignore
   let emojiTriggers = JSON.parse(fs.readFileSync(EMOJI_PATH));
+  // @ts-ignore
   bot.emojiTriggers = emojiTriggers;
 });
 
@@ -65,6 +70,7 @@ bot.on('ready', () => {
   console.log('Logged in');
   mkdirp.sync(PATH);
 
+  // @ts-ignore
   bot.application.commands.set(commandData);
 });
 
@@ -73,6 +79,7 @@ bot.on('messageCreate', message => {
   try {
     onEvent({ event: 'text', data: message, user: message.author, guild: message.guild, bot });
     // Ignore commands coming from itself to prevent any recurssive nonsense
+    // @ts-ignore
     if (message.author.id === bot.user.id) {
       return;
     }
@@ -81,6 +88,7 @@ bot.on('messageCreate', message => {
       if (config.dmWhiteList.length > 0) {
         finalMessage = 'The current commands that are available '
         + 'for direct messages are:\n```';
+        // @ts-ignore
         config.dmWhiteList.map((whiteListedCommand) => {
           finalMessage += `- ${whiteListedCommand}\n`;
         });
@@ -90,10 +98,12 @@ bot.on('messageCreate', message => {
       return;
     }
     // React with any emojis
+    // @ts-ignore
     const emojiKeys = Object.keys(bot.emojiTriggers);
     getJson({
       path: DATA_PATH,
       key: 'userConfigs.' + message.author.id,
+      // @ts-ignore
       cb: (config) => {
         if (config && config.emojiReacts && config.emojiReacts[0] === 'false') {
           return;
@@ -101,9 +111,12 @@ bot.on('messageCreate', message => {
         for (let i = 0; i < emojiKeys.length; i++) {
           if (message.content.toLowerCase().includes(emojiKeys[i])) {
             const random = Math.random();
+            // @ts-ignore
             let emojiArray = bot.emojiTriggers[emojiKeys[i]];
             if (emojiArray) {
+              // @ts-ignore
               emojiArray.forEach((emojiChance) => {
+                // @ts-ignore
                 if (emojiChance.chance >= random && !message.deleted) {
                   if (emojiChance.emoji.split(':')[1]) {
                     message.react(emojiChance.emoji.split(':')[1]).catch((err) => {
@@ -141,6 +154,7 @@ bot.on('messageCreate', message => {
     } catch (err) {
       console.log(err);
       message.channel.send(
+        // @ts-ignore
         `Ran into unexpected error. Check error log.\n${err.message}`
       );
     }
@@ -157,12 +171,16 @@ bot.on('messageReactionAdd', (reaction, user) => {
   }
 });
 
+// @ts-ignore
 bot.on('guildMemberUpdate', (oldMember, newMember) => {
   try {
     onEvent({
       event: 'voiceStateUpdate',
+      // @ts-ignore
       data: { oldVoiceState, newVoiceState },
+      // @ts-ignore
       user: newVoiceState.member.user,
+      // @ts-ignore
       guild: newVoiceState.guild,
       bot,
     });
@@ -176,6 +194,7 @@ bot.on('presenceUpdate', (oldPresence, newPresence) => {
     onEvent({
       event: 'presenceUpdate',
       data: { oldPresence, newPresence },
+      // @ts-ignore
       user: newPresence.member.user,
       guild: newPresence.guild,
       bot,
